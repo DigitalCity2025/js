@@ -92,13 +92,15 @@ for(let th of DOM.table.articles.sortHearders) {
         // trier 
         if(!articlesToDisplay?.length)
             return;
-        const type = typeof articlesToDisplay[0][sort.sortField];
+        const type = typeof articlesToDisplay[0][sortOptions.sortField];
         articlesToDisplay = articlesToDisplay.toSorted((a, b) => {
             switch (type) {
                 case 'number':
                     return (a[sortOptions.sortField] - b[sortOptions.sortField]) * sortOptions.sortOrder;
                 case 'string':
                     return (a[sortOptions.sortField].localeCompare(b[sortOptions.sortField]) * sortOptions.sortOrder);
+                default: 
+                    return 1;
             }
         })
 
