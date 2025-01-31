@@ -52,7 +52,7 @@ const DOM = {
 }
 
 // VARIABLES
-const sort = {
+const sortOptions = {
     sortField: null,
     sortOrder: 1 // -1 DESC 1 ASC
 };
@@ -84,10 +84,10 @@ DOM.buttons.search.addEventListener('click', () => {
 
 for(let th of DOM.table.articles.sortHearders) {
     th.addEventListener('click', () => {
-        sort.sortOrder = 
-            sort.sortField !== th.dataset.sortfield 
-            ? sort.sortOrder : sort.sortOrder * -1
-        sort.sortField = th.dataset.sortfield;
+        sortOptions.sortOrder = sortOptions.sortField !== th.dataset.sortfield 
+            ? sortOptions.sortOrder 
+            : sortOptions.sortOrder * -1;
+        sortOptions.sortField = th.dataset.sortfield;
 
         // trier 
         if(!articlesToDisplay?.length)
@@ -96,9 +96,9 @@ for(let th of DOM.table.articles.sortHearders) {
         articlesToDisplay = articlesToDisplay.toSorted((a, b) => {
             switch (type) {
                 case 'number':
-                    return (a[sort.sortField] - b[sort.sortField]) * sort.sortOrder;
+                    return (a[sortOptions.sortField] - b[sortOptions.sortField]) * sortOptions.sortOrder;
                 case 'string':
-                    return (a[sort.sortField].localeCompare(b[sort.sortField]) * sort.sortOrder);
+                    return (a[sortOptions.sortField].localeCompare(b[sortOptions.sortField]) * sortOptions.sortOrder);
             }
         })
 
