@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        div {
+            margin-bottom: 1em;
+        }
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <div id="form">
+        <div>
+            <label for="search-input">Search</label>
+            <input id="search-input" type="text">
+        </div>
+        <div>
+            <label for="min-input">Min</label>
+            <input id="min-input" type="number">
+        </div>
+        <div>
+            <label for="max-input">Max</label>
+            <input id="max-input" type="number">
+        </div>
+        <div>
+            <button id="search-button">Rechecher</button>
+        </div>
+    </div>
+
+    <table id="articles-table">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Description</th>
+                <th>Prix</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script src="./filtre.js"></script>
+</body>
+</html>

@@ -105,3 +105,4 @@ console.log(set); // [42, 1];
 
 // retirer les doublons d'un tableau
 tableau = [...new Set(tableau)];
+
