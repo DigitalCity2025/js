@@ -15,6 +15,14 @@ function a() {
 }
 
 const c = () => {
-    
+
 }
 
+
+const somme = (...numbers) => {
+    return numbers.reduce((p, c) => p + c, 0);
+}
+
+const tableau = [42,17,19,1,2,3,1.5];
+
+console.log(somme(...tableau))
