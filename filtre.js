@@ -1,4 +1,5 @@
 "use strict"
+
 // DATA
 const DATA = [
     {"id": 1, "nom": "Ordinateur Portable", "description": "Ordinateur portable 15 pouces avec processeur i7", "prix": 999.99},
@@ -48,53 +49,29 @@ const DOM = {
             tbody: document.querySelector('#articles-table > tbody'),
             sortHearders: document.querySelectorAll('[data-sortfield]'),
         }
+    },
+    p: {
+        averagePrice: document.getElementById('averagePrice')
     }
 }
 
-// VARIABLES
-const sortOptions = {
-    sortField: null,
-    sortOrder: 1 // -1 DESC 1 ASC
-};
-let articlesToDisplay;
-
-
-// EVENTS
-DOM.buttons.search.addEventListener('click', () => {
-    const search = DOM.inputs.search.value.toUpperCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
-    const min = DOM.inputs.min.value;
-    const max = DOM.inputs.max.value;
-
-    // filtrer 
-    articlesToDisplay = DATA
+// FUNCTIONS
+// fonctions réutilisables qui vont calculer qq chose
+const UTILS = {
+    normalize: string => string.toUpperCase().normalize("NFD").replace(/\p{Diacritic}/gu, ""),
+    avg : (array, selectorCb) => array.reduce((previous, current) => previous + (selectorCb(current) / array.length), 0),
+    applySortAndFilters: () => DATA
         .map(d => ({
             ...d, 
-            normalizedName: d.nom.toUpperCase().normalize("NFD").replace(/\p{Diacritic}/gu, ""), 
-            normalizedDescription: d.description.toLocaleUpperCase().normalize("NFD").replace(/\p{Diacritic}/gu, "")
-        }))
-        .filter(d => 
-            (!search || d.normalizedName.includes(search) || d.normalizedDescription.includes(search))
-            && (!min || d.prix >= min)
-            && (!max || d.prix <= max)
-    );
-
-    // afficher les articles
-    displayArticles();
-});
-
-for(let th of DOM.table.articles.sortHearders) {
-    th.addEventListener('click', () => {
-        sortOptions.sortOrder = sortOptions.sortField !== th.dataset.sortfield 
-            ? sortOptions.sortOrder 
-            : sortOptions.sortOrder * -1;
-        sortOptions.sortField = th.dataset.sortfield;
-
-        // trier 
-        if(!articlesToDisplay?.length)
-            return;
-        const type = typeof articlesToDisplay[0][sortOptions.sortField];
-        articlesToDisplay = articlesToDisplay.toSorted((a, b) => {
-            switch (type) {
+            normalizedName: UTILS.normalize(d.nom), 
+            normalizedDescription: UTILS.normalize(d.description)
+        })
+        ).filter(d => 
+            (!filterOptions.search || d.normalizedName.includes(filterOptions.search) || d.normalizedDescription.includes(filterOptions.search))
+            && (!filterOptions.min || d.prix >= filterOptions.min)
+            && (!filterOptions.max || d.prix <= filterOptions.max)
+        ).toSorted((a, b) => {
+            switch (sortOptions.type) {
                 case 'number':
                     return (a[sortOptions.sortField] - b[sortOptions.sortField]) * sortOptions.sortOrder;
                 case 'string':
@@ -102,30 +79,78 @@ for(let th of DOM.table.articles.sortHearders) {
                 default: 
                     return 1;
             }
-        })
-
-        // afficher les articles
-        displayArticles();
-    });
+    })
 }
 
+// fonctions qui vont être liées aux événements
+const HANDLERS = {
+    onSearch: () => {
+        filterOptions.search = UTILS.normalize(DOM.inputs.search.value);
+        filterOptions.min = DOM.inputs.min.valueAsNumber;
+        filterOptions.max = DOM.inputs.max.valueAsNumber;
 
-// FONCTIONS
-function displayArticles() {
-    // vider la table des articles
-    DOM.table.articles.tbody.replaceChildren();
+        articlesToDisplay = UTILS.applySortAndFilters();
+        RENDER.displayArticles();
+        RENDER.displayAveragePrice();
+    },
+    onSortHeader: (th) => {
+        sortOptions.sortOrder = sortOptions.sortField !== th.dataset.sortfield 
+            ? sortOptions.sortOrder 
+            : sortOptions.sortOrder * -1;
+        sortOptions.sortField = th.dataset.sortfield;
+        sortOptions.type = typeof articlesToDisplay[0][sortOptions.sortField];
 
-    for(let article of articlesToDisplay) {
+        articlesToDisplay = UTILS.applySortAndFilters();
+        RENDER.displayArticles();
+    }
+}
+
+// fonctions qui vont être liées à l'affichage
+const RENDER = {
+    createArticleRow: article => {
         const tr = document.createElement('tr');
         const tdNom = document.createElement('td');
         const tdDescription = document.createElement('td');
         const tdPrix = document.createElement('td');
         
-        DOM.table.articles.tbody.append(tr);
         tr.append(tdNom, tdDescription, tdPrix);
-
+        
         tdNom.textContent = article.nom;
         tdDescription.textContent = article.description;
         tdPrix.textContent = article.prix + '€';
+        return tr;
+    },
+    displayArticles: () => {
+        DOM.table.articles.tbody.replaceChildren();
+        DOM.table.articles.tbody
+            .append(...articlesToDisplay.map(RENDER.createArticleRow))
+    },
+    displayAveragePrice: () =>{
+        const m = UTILS.avg(articlesToDisplay, a => a.prix );
+        DOM.p.averagePrice.textContent = m.toFixed(2) + "€";    
     }
 }
+
+// VARIABLES
+const sortOptions = {
+    sortField: null,
+    sortOrder: 1, // -1 DESC 1 ASC,
+    type: null,
+};
+const filterOptions = {
+    search: null,
+    min: null,
+    max: null,
+}
+let articlesToDisplay;
+
+
+// EVENTS
+DOM.buttons.search.addEventListener('click', HANDLERS.onSearch);
+
+DOM.table.articles.sortHearders.forEach(th => {
+    th.addEventListener('click', () => HANDLERS.onSortHeader(th));
+})
+
+
+
